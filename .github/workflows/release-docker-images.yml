@@ -4,10 +4,7 @@ name: Docker image builds
 on:
   push:
     branches:
-      - main
-      - stable
-      - edge
-      - dev
+      - edge-civictechto
 
 jobs:
   build:
@@ -29,6 +26,13 @@ jobs:
         with:
           ref: ${{ steps.extract_branch.outputs.branch }}
 
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.CR_PAT }}
+
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
@@ -36,7 +40,22 @@ jobs:
           password: ${{ secrets.DOCKER_TOKEN }}
 
       - name: Build full project via docker-compose
-        run: docker compose --profile postgres build --parallel --build-arg GIT_HASH=${GITHUB_SHA:0:6}
+        run: |
+          mv example.env .env
+          sed -i 's/docker.io/ghcr.io/g' docker-compose.yml
+          sed -i 's/compdem/civictechto/g' docker-compose.yml
+          docker compose --profile postgres build --parallel --build-arg GIT_HASH=${GITHUB_SHA:0:6}
+
+      - name: Push images to GHCR
+        run: docker compose --profile postgres push --ignore-push-failures
 
       - name: Push images to Docker Hub
-        run: docker compose --profile postgres push --ignore-push-failures
+        run: |
+          for image in $(docker images --format='{{.Repository}}:{{.Tag}}'); do
+            IMAGE_NAME=$(echo "$image" | sed 's/ghcr.io/docker.io/g')
+            IMAGE_NAME=$(echo "$IMAGE_NAME" | sed 's/civictechto/${{ secrets.DOCKER_USERNAME }}/g')
+            docker tag $image $IMAGE_NAME
+            sed -i 's/ghcr.io/docker.io/g' docker-compose.yml
+            sed -i 's/civictechto/${{ secrets.DOCKER_USERNAME }}/g' docker-compose.yml
+          done
+          docker compose --profile postgres push --ignore-push-failures

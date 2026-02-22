@@ -12,8 +12,7 @@ import strings from '../../strings/strings'
 
 const fbAppId = process.env.FB_APP_ID
 
-@connect((state) => state.signin)
-class Createuser extends React.Component {
+class CreateuserClass extends React.Component {
   getDest() {
     return this.props.location.pathname.slice('/createuser'.length)
   }
@@ -69,6 +68,7 @@ class Createuser extends React.Component {
                 fontFamily: 'body',
                 fontSize: [2],
                 width: '35em',
+                maxWidth: '100%',
                 borderRadius: 2,
                 padding: [2],
                 border: '1px solid',
@@ -86,6 +86,7 @@ class Createuser extends React.Component {
                 fontFamily: 'body',
                 fontSize: [2],
                 width: '35em',
+                maxWidth: '100%',
                 borderRadius: 2,
                 padding: [2],
                 border: '1px solid',
@@ -103,6 +104,7 @@ class Createuser extends React.Component {
                 fontFamily: 'body',
                 fontSize: [2],
                 width: '35em',
+                maxWidth: '100%',
                 borderRadius: 2,
                 padding: [2],
                 border: '1px solid',
@@ -120,6 +122,7 @@ class Createuser extends React.Component {
                 fontFamily: 'body',
                 fontSize: [2],
                 width: '35em',
+                maxWidth: '100%',
                 borderRadius: 2,
                 padding: [2],
                 border: '1px solid',
@@ -220,5 +223,6 @@ class Createuser extends React.Component {
     )
   }
 }
+const Createuser = connect((state) => state.signin)(CreateuserClass)
 
 export default Createuser
